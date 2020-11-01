@@ -3,9 +3,12 @@ import { Form, Button, Row, Col } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import Message from '../../Message/Message';
 import Loader from '../../Loader/Loader';
-import { getUserDetails } from '../../../actions/userActions';
+import {
+    getUserDetails,
+    updateUserProfile,
+} from '../../../actions/userActions';
 
-const ProfileScreen = ({ location, history }) => {
+const ProfileScreen = ({ history }) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -20,11 +23,14 @@ const ProfileScreen = ({ location, history }) => {
     const userLogin = useSelector((state) => state.userLogin);
     const { userInfo } = userLogin;
 
+    const userUpdateProfile = useSelector((state) => state.userUpdateProfile);
+    const { success } = userUpdateProfile;
+
     useEffect(() => {
         if (!userInfo) {
             history.push('/login');
         } else {
-            if (!user.name) {
+            if (!user?.name) {
                 dispatch(getUserDetails('profile'));
             } else {
                 setName(user.name);
@@ -38,7 +44,9 @@ const ProfileScreen = ({ location, history }) => {
         if (password !== confirmPassword) {
             setMessage('Passwords do not match');
         } else {
-            // DISPATCH UPDATE PROFILE
+            dispatch(
+                updateUserProfile({ id: user._id, name, email, password })
+            );
         }
     };
 
@@ -48,6 +56,9 @@ const ProfileScreen = ({ location, history }) => {
                 <h2>User Profile</h2>
                 {message && <Message varient='danger'>{message}</Message>}
                 {error && <Message varient='danger'>{error}</Message>}
+                {success && (
+                    <Message varient='success'>Profile Updated</Message>
+                )}
                 {loading && <Loader />}
                 <Form onSubmit={submitHandler}>
                     <Form.Group controlId='name'>
